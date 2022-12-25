@@ -168,6 +168,7 @@ class AutoBattle @Inject constructor(
             { connectionRetry.needsToRetry() } to { connectionRetry.retry() },
             { battle.isIdle() } to {
                 battleLoadingPossible = false
+                servantDeathPossible = false
                 storySkipPossible = false
                 battle.performBattle()
                 servantDeathPossible = true
@@ -262,10 +263,10 @@ class AutoBattle @Inject constructor(
     private fun isCeRewardDetails() =
         images[Images.CEDetails] in locations.resultCeRewardDetailsRegion
 
-    private fun isDeathAnimation() =
-        servantDeathPossible && FieldSlot.list
-            .map { locations.battle.servantPresentRegion(it) }
-            .count { it.exists(images[Images.ServantExist], similarity = 0.70) } in 1..2
+    private fun isDeathAnimation() = servantDeathPossible
+        //  && FieldSlot.list
+        //     .map { locations.battle.servantPresentRegion(it) }
+        //     .count { it.exists(images[Images.ServantExist], similarity = 0.70) } in 1..2
 
 
     private fun isBattleLoading() = battleLoadingPossible
