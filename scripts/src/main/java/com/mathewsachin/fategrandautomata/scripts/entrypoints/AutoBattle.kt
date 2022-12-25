@@ -185,7 +185,7 @@ class AutoBattle @Inject constructor(
             { isBond10CEReward() } to { bond10CEReward() },
             { isCeRewardDetails() } to { ceRewardDetails() },
             { isDeathAnimation() } to { locations.battle.extraInfoWindowCloseClick.click() },
-            { isBattleLoading() } to { accelerateBattleLoading() }
+            { isBattleLoading() } to { locations.battle.extraInfoWindowCloseClick.click() }
         )
 
         // Loop through SCREENS until a Validator returns true
@@ -268,14 +268,7 @@ class AutoBattle @Inject constructor(
             .count { it.exists(images[Images.ServantExist], similarity = 0.70) } in 1..2
 
 
-    private fun isBattleLoading() =
-        battleLoadingPossible
-
-    private fun accelerateBattleLoading() {
-        1.seconds.wait()
-        locations.battle.extraInfoWindowCloseClick.click(1)
-    }
-    
+    private fun isBattleLoading() = battleLoadingPossible
 
     private fun ceRewardDetails() {
         if (prefs.stopOnCEGet) {
