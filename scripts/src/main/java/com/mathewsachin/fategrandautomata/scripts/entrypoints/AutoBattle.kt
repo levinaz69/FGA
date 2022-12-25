@@ -80,6 +80,9 @@ class AutoBattle @Inject constructor(
     // for tracking whether to check for servant deaths or not
     private var servantDeathPossible = false
 
+    // for tracking whether in battle loading stage or not
+    private var battleLoadingPossible = false
+
     override fun script(): Nothing {
         try {
             loop()
@@ -164,6 +167,7 @@ class AutoBattle @Inject constructor(
         val screens: Map<() -> Boolean, () -> Unit> = mapOf(
             { connectionRetry.needsToRetry() } to { connectionRetry.retry() },
             { battle.isIdle() } to {
+                battleLoadingPossible = false
                 storySkipPossible = false
                 battle.performBattle()
                 servantDeathPossible = true
@@ -180,8 +184,8 @@ class AutoBattle @Inject constructor(
             { isFriendRequestScreen() } to { skipFriendRequestScreen() },
             { isBond10CEReward() } to { bond10CEReward() },
             { isCeRewardDetails() } to { ceRewardDetails() },
-            { isDeathAnimation() } to { locations.battle.extraInfoWindowCloseClick.click() }
-
+            { isDeathAnimation() } to { locations.battle.extraInfoWindowCloseClick.click() },
+            { isBattleLoading() } to { accelerateBattleLoading() }
         )
 
         // Loop through SCREENS until a Validator returns true
@@ -211,6 +215,8 @@ class AutoBattle @Inject constructor(
     private fun menu() {
         // In case the repeat loop breaks and we end up in menu (like withdrawing from quests)
         isContinuing = false
+
+        battleLoadingPossible = false
 
         battle.resetState()
 
@@ -260,6 +266,16 @@ class AutoBattle @Inject constructor(
         servantDeathPossible && FieldSlot.list
             .map { locations.battle.servantPresentRegion(it) }
             .count { it.exists(images[Images.ServantExist], similarity = 0.70) } in 1..2
+
+
+    private fun isBattleLoading() =
+        battleLoadingPossible
+
+    private fun accelerateBattleLoading() {
+        1.seconds.wait()
+        locations.battle.extraInfoWindowCloseClick.click(1)
+    }
+    
 
     private fun ceRewardDetails() {
         if (prefs.stopOnCEGet) {
@@ -321,6 +337,8 @@ class AutoBattle @Inject constructor(
 
         // If Stamina is empty, follow same protocol as is in "Menu" function Auto refill.
         afterSelectingQuest()
+
+        battleLoadingPossible = true
     }
 
     private fun isFriendRequestScreen() =
@@ -408,6 +426,8 @@ class AutoBattle @Inject constructor(
 
         useBoostItem()
         storySkipPossible = true
+
+        battleLoadingPossible = true
     }
 
     /**
